@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Digital Signage</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: black;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  video {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover; /* change to 'contain' if needed */
+    background: black;
+  }
+</style>
+</head>
+<body>
+
+<video id="player"
+       autoplay
+       muted
+       loop
+       playsinline
+       preload="auto">
+  <source src="video.webm" type="video/webm">
+  Your browser does not support WebM playback.
+</video>
+
+<script>
+  const video = document.getElementById('player');
+
+  async function startPlayback() {
+    try {
+      await video.play();
+    } catch (err) {
+      setTimeout(startPlayback, 2000);
+    }
+  }
+
+  // Reload source on error
+  video.addEventListener('error', () => {
+    console.log("Video error — reloading source.");
+    video.load();
+    startPlayback();
+  });
+
+  // Watchdog: reload page if playback stalls
+  let lastTime = 0;
+  setInterval(() => {
+    if (!video.paused && !video.ended) {
+      if (video.currentTime === lastTime) {
+        console.log("Playback stalled — reloading page.");
+        location.reload();
+      }
+      lastTime = video.currentTime;
+    }
+  }, 15000);
+
+  window.addEventListener('load', startPlayback);
+</script>
+
+</body>
+</html>
